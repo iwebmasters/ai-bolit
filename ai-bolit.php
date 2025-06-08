@@ -1128,7 +1128,7 @@ function printProgress($num, &$par_File, $vars) {
         'updated' => time(),
         'progress' => $percent,
         'time_elapsed' => $elapsed_seconds,
-        'time_left' => round($left_time),
+        'time_left' => round($left_time ?? 0),
         'files_left' => $left_files,
         'files_total' => $total_files,
         'current_file' => substr($g_AddPrefix . str_replace($g_NoPrefix, '', $par_File), -160)
@@ -1969,7 +1969,7 @@ function getEmails($email) {
  */
 function getBytes($val) {
     $val  = trim($val);
-    $last = strtolower($val{strlen($val) - 1});
+    $last = strtolower($val[strlen($val) - 1]);
     switch ($last) {
         case 't':
             $val *= 1024;
@@ -2291,9 +2291,10 @@ function QCR_ScanDirectories($l_RootDir, $vars) {
         // which files should be scanned
         $l_NeedToScan = SCAN_ALL_FILES || (in_array($l_Ext, $g_SensitiveFiles));
 
-        if (in_array(strtolower($l_Ext), $g_IgnoredExt)) {
-            $l_NeedToScan = false;
-        }
+        if (!is_array($g_IgnoredExt)) $g_IgnoredExt = array();
+if (in_array(strtolower($l_Ext), $g_IgnoredExt)) {
+    $l_NeedToScan = false;
+}
 
         // if folder in ignore list
         $l_Skip = false;
@@ -2419,7 +2420,8 @@ function escapedHexToHex($escaped) {
 }
 function escapedOctDec($escaped) {
     $GLOBALS['g_EncObfu']++;
-    return chr(octdec($escaped[1]));
+    $octal_str = isset($escaped[1]) && preg_match('/^[0-7]+$/', $escaped[1]) ? $escaped[1] : '0';
+    return chr(octdec($octal_str));
 }
 function escapedDec($escaped) {
     $GLOBALS['g_EncObfu']++;
@@ -2521,10 +2523,11 @@ function UnwrapObfu($par_Content) {
     $par_Content = preg_replace('/[\'"]\s*?\.+\s*?[\'"]/smi', '', $par_Content);
     $par_Content = preg_replace('/[\'"]\s*?\++\s*?[\'"]/smi', '', $par_Content);
 
-    $content = str_replace('<?$', '<?php$', $content);
-    $content = str_replace('<?php', '<?php ', $content);
+    if ($content === null) $content = '';
+$content = str_replace('<?$', '<?php$', $content);
+$content = str_replace('<?php', '<?php ', $content);
 
-    return $par_Content;
+return $par_Content;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -10459,8 +10462,8 @@ class Deobfuscator
                 $xor = "";
                 for ($i = 0; $i < strlen($string);) {
                     for ($j = 0; $j < strlen($key); $j++,$i++) {
-                        if (isset($string{$i})) {
-                            $xor .= $string{$i} ^ $key{$j};
+                        if (isset($string[$i])) {
+                            $xor .= $string[$i] ^ $key[$j];
                         }
                     }
                 }
