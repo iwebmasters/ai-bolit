@@ -2278,9 +2278,9 @@ function QCR_ScanDirectories($l_RootDir, $vars) {
 
     // PATCH: skip unreadable or non-existent files/dirs
     if (!file_exists($l_FileName) || !is_readable($l_FileName)) {
-        stdOut("Error:" . $l_FileName . " either is not a file or readable");
-        continue;
-    }
+    // Just skip silently
+    continue;
+}
 
     $l_Type = filetype($l_FileName);
 
@@ -2905,10 +2905,16 @@ function QCR_GoScan($s_file, $vars, $callback = null, $base64_encoded = true, $s
             $filepath = $base64_encoded ? FilepathEscaper::decodeFilepathByBase64($filepath_encoded) : $filepath_encoded;
             $filepath = trim($filepath);
 
-            if (!file_exists($filepath) || !is_file($filepath) || !is_readable($filepath)) {
-                stdOut("Error:" . $filepath . " either is not a file or readable");
-                continue;
-            }
+            if (empty($filepath) || !(file_exists($filepath) && is_readable($filepath))) {
+    if (!is_dir($filepath)) {
+        stdOut("Error:" . $filepath . " either is not a file or readable");
+    }
+    continue;
+}
+if (!is_file($filepath)) {
+    // It's a directory, skip without log
+    continue;
+}
             
             $filesize = filesize($filepath);
             if ($filesize > MAX_FILE_SIZE_FOR_CHECK) {
