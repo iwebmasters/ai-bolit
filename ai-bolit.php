@@ -2270,20 +2270,28 @@ function QCR_ScanDirectories($l_RootDir, $vars) {
         return;
     }
     while (($l_FileName = readdir($l_DIRH)) !== false) {
-            
-        if ($l_FileName == '.' || $l_FileName == '..') {
-            continue;
-        }
-        $l_FileName = $l_RootDir . DIR_SEPARATOR . $l_FileName;
-        $l_Type = filetype($l_FileName);
-            
-        if ($l_Type == "link") {
-            $vars->symLinks[] = $l_FileName;
-            continue;
-        } 
-        elseif ($l_Type != "file" && $l_Type != "dir") {
-            continue;
-        }
+
+    if ($l_FileName == '.' || $l_FileName == '..') {
+        continue;
+    }
+    $l_FileName = $l_RootDir . DIR_SEPARATOR . $l_FileName;
+
+    // PATCH: skip unreadable or non-existent files/dirs
+    if (!file_exists($l_FileName) || !is_readable($l_FileName)) {
+        stdOut("Error:" . $l_FileName . " either is not a file or readable");
+        continue;
+    }
+
+    $l_Type = filetype($l_FileName);
+
+    if ($l_Type == "link") {
+        $vars->symLinks[] = $l_FileName;
+        continue;
+    } 
+    elseif ($l_Type != "file" && $l_Type != "dir") {
+        continue;
+    }
+   
 
         $l_Ext   = strtolower(pathinfo($l_FileName, PATHINFO_EXTENSION));
         $l_IsDir = is_dir($l_FileName);
