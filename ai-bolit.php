@@ -28,7 +28,7 @@ if (isCli()) {
 }
 
 if (!defined('LANG')) {
-    define('LANG', 'RU');
+    define('LANG', 'EN');
 }
 
 // put 1 for expert mode, 0 for basic check and 2 for paranoid mode
@@ -4516,7 +4516,24 @@ $l_Template = str_replace('@@CREDITS@@', AI_STR_075, $l_Template);
 
 $l_Template = str_replace('@@FOOTER@@', AI_STR_076, $l_Template);
 
-$l_Template = str_replace('@@STAT@@', sprintf(AI_STR_012, $time_taken, date('d-m-Y в H:i:s', floor(START_TIME)), date('d-m-Y в H:i:s')), $l_Template);
+// Use correct number of arguments for AI_STR_012 in both languages
+if (LANG === 'EN') {
+    $l_Template = str_replace('@@STAT@@', sprintf(
+        AI_STR_012,
+        $sign_count,
+        count($g_JSVirSig),
+        $time_taken,
+        date('d-m-Y H:i:s', floor(START_TIME)),
+        date('d-m-Y H:i:s')
+    ), $l_Template);
+} else {
+    $l_Template = str_replace('@@STAT@@', sprintf(
+        AI_STR_012,
+        $time_taken,
+        date('d-m-Y в H:i:s', floor(START_TIME)),
+        date('d-m-Y в H:i:s')
+    ), $l_Template);
+}
 
 ////////////////////////////////////////////////////////////////////////////
 $l_Template = str_replace("@@MAIN_CONTENT@@", $l_Result, $l_Template);
